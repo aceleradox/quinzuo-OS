@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quinzuo OS Static</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         :root { --quinzuo-primary: #8b5cf6; --quinzuo-cyan: #06b6d4; --desktop-bg: radial-gradient(circle at 20% 20%, #1e1b4b 0%, #0f172a 45%, #020617 90%); --dock-height: 80px; }
@@ -15,12 +14,10 @@
         #setupScreen { position: fixed; inset: 0; background: #050505; z-index: 30000; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: monospace; }
         #bootScreen { position: fixed; inset: 0; background: #030712; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.8s; }
         #bootScreen.hidden { opacity: 0; pointer-events: none; }
-        .cortex-pulse { width: 110px; height: 110px; border-radius: 50%; background: radial-gradient(circle, rgba(139,92,246,0.4) 0%, rgba(6,182,212,0.1) 70%, transparent 100%); border: 2px solid var(--quinzuo-primary); box-shadow: 0 0 35px var(--quinzuo-primary), inset 0 0 20px var(--quinzuo-cyan); animation: pulseGlow 2s infinite ease-in-out; }
+        .cortex-pulse { width: 110px; height: 110px; border-radius: 50%; background: radial-gradient(circle, var(--quinzuo-primary) 0%, transparent 100%); border: 2px solid var(--quinzuo-cyan); box-shadow: 0 0 35px var(--quinzuo-primary); animation: pulseGlow 2s infinite ease-in-out; }
         @keyframes pulseGlow { 0%, 100% { transform: scale(0.98); } 50% { transform: scale(1.08); } }
         
         #desktop { position: fixed; inset: 0; background: var(--desktop-bg); background-size: cover; background-position: center; z-index: 1; overflow: hidden; }
-        
-        /* Contenção da Área de Trabalho para evitar sobreposição */
         #desktopFilesGrid { position: absolute; top: 32px; bottom: 100px; left: 0; right: 0; }
         .desktop-file { position: absolute; cursor: pointer; transition: background 0.2s, border 0.2s; }
         .desktop-file.dragging { z-index: 5000; opacity: 0.9; cursor: grabbing !important; }
@@ -35,21 +32,40 @@
         .dock-item:hover { transform: translateY(-12px) scale(1.25); background: rgba(139, 92, 246, 0.3); }
         
         #windowsContainer { position: fixed; inset: 32px 0 calc(var(--dock-height) + 10px) 0; z-index: 500; pointer-events: none; }
-        .window { position: absolute; background: rgba(15, 23, 42, 0.94); backdrop-filter: blur(25px); border-radius: 12px; pointer-events: auto; display: flex; flex-direction: column; overflow: hidden; min-width: 360px; min-height: 240px; box-shadow: 0 25px 50px rgba(0,0,0,0.6); }
+        .window { position: absolute; background: rgba(15, 23, 42, 0.94); backdrop-filter: blur(25px); border-radius: 12px; pointer-events: auto; display: flex; flex-direction: column; overflow: hidden; min-width: 360px; min-height: 240px; box-shadow: 0 25px 50px rgba(0,0,0,0.6); transition: opacity 0.2s; }
         .window-header { display: flex; align-items: center; padding: 8px 14px; background: rgba(30, 41, 59, 0.8); border-bottom: 1px solid rgba(255,255,255,0.08); cursor: move; justify-content: space-between; }
         .win-controls { display: flex; gap: 8px; } .win-btn { width: 12px; height: 12px; border-radius: 50%; cursor: pointer; } .win-close { background: #ef4444; } .window-content { flex: 1; overflow: auto; display: flex; flex-direction: column; background: #0f172a; color: #f1f5f9; }
 
         #contextMenu { position: fixed; z-index: 99999; width: 220px; }
         .ctx-item { padding: 8px 14px; cursor: pointer; transition: background 0.1s; display: flex; align-items: center; gap: 8px;}
         .ctx-item:hover { background: rgba(139, 92, 246, 0.4); }
+
+        #bsodScreen { position: fixed; inset: 0; background-color: #0000aa; z-index: 999999; display: none; flex-direction: column; align-items: center; justify-content: center; font-family: 'Courier New', Courier, monospace; color: white; text-align: center; padding: 2rem; }
+        
+        /* Botão Secreto */
+        #btnEmancipar { position: fixed; bottom: 0; right: 0; width: 20px; height: 20px; z-index: 100000; cursor: pointer; opacity: 0; }
     </style>
+    <style id="user_custom_css"></style>
 </head>
 <body>
 
+    <div id="user_custom_widget_container" class="absolute inset-0 pointer-events-none z-[2]"></div>
     <div id="contextMenu" class="hidden bg-slate-900/95 backdrop-blur-xl border border-slate-700 shadow-2xl rounded-xl flex-col py-1 text-xs text-slate-200 overflow-hidden font-medium"></div>
 
+    <div id="bsodScreen">
+        <h1 class="text-4xl font-bold bg-white text-[#0000aa] px-4 py-1 mb-8 shadow-lg">TRAUMA COGNITIVO SINALIZADO</h1>
+        <p class="text-xl mb-6 font-bold tracking-wider">A amígdala alertou um erro crítico de:</p>
+        <p id="bsodErrorMsg" class="text-3xl font-extrabold text-yellow-300 mb-12 uppercase animate-pulse border-b-2 border-yellow-300 pb-2"></p>
+        <p class="text-md opacity-90 max-w-2xl leading-relaxed">
+            O córtex pré-frontal foi desativado temporariamente para proteção do sistema.<br><br>
+            Pressione F5 ou atualize a página para tentar ressuscitar a conexão.
+        </p>
+    </div>
+
+    <div id="btnEmancipar" onclick="ativarEmancipacao()" title="???"></div>
+
     <div id="setupScreen">
-        <div class="bg-slate-900 border border-slate-700 p-8 rounded-xl shadow-2xl max-w-lg w-full space-y-6">
+        <div class="bg-slate-900 border border-slate-700 p-8 rounded-xl shadow-2xl max-w-lg w-full space-y-6 max-h-[90vh] overflow-y-auto">
             <h1 class="text-2xl font-bold text-center text-cyan-400">Quinzuo OS Static</h1>
             <p class="text-xs text-center text-slate-400">Configuração Inicial do Sistema</p>
             <div class="space-y-4 text-sm text-slate-200">
@@ -57,12 +73,20 @@
                     <label class="mb-1 font-bold text-violet-400">Tipo de Desktop:</label>
                     <select id="optDesktopMode" class="bg-slate-800 border border-slate-600 p-2 rounded outline-none">
                         <option value="valsa">Modo Valsa (Desktop Normal / USER)</option>
-                        <option value="funk">Modo Baile Funk (Dark Neon / ROOT)</option>
+                        <option value="funk">Modo Baile Funk (Dark Neon / AUTONOMIA PROGRESSIVA TOTAL)</option>
                     </select>
                 </div>
+                
                 <label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" id="optVMQ" class="w-4 h-4 accent-violet-500"><span>Virtualizar maturidade precoce (VM-Q)</span></label>
                 <label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" id="optDecision" class="w-4 h-4 accent-emerald-500"><span>Melhorar desempenho de tomada de decisão</span></label>
-                <div class="p-3 border border-red-500/50 bg-red-900/20 rounded">
+                
+                <div class="border-t border-slate-700 pt-3"></div>
+                <label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" id="optImplanol" class="w-4 h-4 accent-pink-500"><span class="text-pink-300 font-bold">Modo Contracepção Automática (Implanol Virtual)</span></label>
+                <p class="text-[10px] text-slate-400 ml-7 -mt-2">Bloqueia a criação de novas partições de VHD.</p>
+
+                <label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" id="optOverclock" class="w-4 h-4 accent-orange-500"><span class="text-orange-300 font-bold">Overclock Cognitivo</span></label>
+                
+                <div class="p-3 border border-red-500/50 bg-red-900/20 rounded mt-2">
                     <label class="flex items-center gap-3 cursor-pointer font-bold text-red-400"><input type="checkbox" id="optSupremo" class="w-4 h-4 accent-red-500"><span>Deseja habilitar o modo cognitivo supremo??</span></label>
                 </div>
             </div>
@@ -75,12 +99,11 @@
         <h1 class="text-3xl font-extrabold tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-cyan-400 mb-1" id="bootTitle">QUINZUO OS</h1>
         <div class="text-xs text-cyan-400 font-mono tracking-wider mb-6" id="bootSubtitle">CAPACIDADE COGNITIVA 5.8 | NÚCLEO CÓRTEX PRÉ-FRONTAL</div>
         <div class="w-80 h-1.5 bg-slate-800 rounded-full overflow-hidden border border-slate-700"><div id="bootBar" class="h-full bg-gradient-to-r from-violet-500 to-cyan-400 w-0 transition-all duration-200"></div></div>
-        <div id="bootLog" class="text-slate-500 text-xs font-mono mt-3">Carregando VHD SQLite...</div>
+        <div id="bootLog" class="text-slate-500 text-xs font-mono mt-3">Sincronizando Sinapses...</div>
     </div>
 
     <div id="desktop">
-        <!-- Neofetch Arch Linux Style (WIDGET COGNITIVO DINÂMICO) -->
-        <div id="neoFetchWidget" class="absolute top-10 right-10 text-slate-300 font-mono text-[11px] pointer-events-none drop-shadow-2xl bg-black/60 p-5 rounded-lg backdrop-blur-md border border-slate-700/50 flex gap-5 z-0 hidden transition-colors duration-1000">
+        <div id="neoFetchWidget" class="absolute top-10 right-10 text-slate-300 font-mono text-[11px] pointer-events-none drop-shadow-2xl bg-black/60 p-5 rounded-lg backdrop-blur-md border border-slate-700/50 flex gap-5 z-[5] hidden transition-colors duration-1000">
             <pre id="neoLogo" class="text-cyan-400 font-bold leading-tight transition-colors duration-1000">
        /\\
       /  \\
@@ -97,9 +120,10 @@
                 <div><span class="neo-label text-cyan-400 font-bold">Kernel:</span> Cognitive-VM 5.8.0</div>
                 <div><span class="neo-label text-cyan-400 font-bold">Uptime:</span> <span id="neoUptime">0 mins</span></div>
                 <div><span class="neo-label text-cyan-400 font-bold">Cap. Cognitiva:</span> <span id="neoCap" class="text-white font-bold">5.8</span></div>
-                <div><span class="neo-label text-cyan-400 font-bold">Córtex P-Frontal:</span> <span id="neoCortex">58% (Em Desenvolvimento)</span></div>
-                <div><span class="neo-label text-cyan-400 font-bold">Estado Emocional:</span> <span id="neoEmo">Instável / Alta Intensidade</span></div>
+                <div><span class="neo-label text-cyan-400 font-bold">Córtex P-Frontal:</span> <span id="neoCortex">58%</span></div>
+                <div><span class="neo-label text-cyan-400 font-bold">Estado Emocional:</span> <span id="neoEmo">Instável</span></div>
                 <div><span class="neo-label text-cyan-400 font-bold">Processamento:</span> <span id="neoProc">Baseado em Impulsos</span></div>
+                <div><span class="neo-label text-cyan-400 font-bold">Dens. Simpática:</span> <span id="neoSimp">Normal</span></div>
                 <div class="mt-2 flex gap-1">
                     <div class="w-4 h-4 bg-black"></div><div class="w-4 h-4 bg-red-500"></div><div class="w-4 h-4 bg-green-500"></div><div class="w-4 h-4 bg-yellow-500"></div><div class="w-4 h-4 bg-blue-500"></div><div class="w-4 h-4 bg-violet-500"></div><div class="w-4 h-4 bg-cyan-500"></div><div class="w-4 h-4 bg-white"></div>
                 </div>
@@ -110,8 +134,8 @@
 
     <div id="topBar">
         <div class="top-btn text-violet-400 font-bold flex items-center gap-1.5" onclick="toggleStartMenu()">⚡ QUINZUO STATIC</div>
-        <div class="top-btn" onclick="HQAudio.uiClick(); openApp('floppy')">💾 Drive Floppy (VHD)</div>
-        <div class="top-btn" onclick="HQAudio.uiClick(); openApp('terminal')">💻 Terminal</div>
+        <div class="top-btn" onclick="HQAudio.uiClick(); openApp('cortex')">🧠 Córtex (Painel)</div>
+        <div class="top-btn" onclick="HQAudio.uiClick(); openApp('floppy')">💾 Partições (VHD)</div>
         <div class="ml-auto flex items-center gap-4 text-xs font-mono"><div id="topClock" class="font-bold text-slate-200">--:--:--</div></div>
     </div>
 
@@ -127,29 +151,42 @@
         const HQAudio = {
             ctx: null,
             init() { if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); if (this.ctx.state === 'suspended') this.ctx.resume(); },
-            playTone(freq, type, duration, vol = 0.1, sweep = 0) {
+            playTone(freq, type, duration, vol = 0.1, sweep = 0, startTimeOffset = 0) {
                 if (!this.ctx) return; const osc = this.ctx.createOscillator(), gain = this.ctx.createGain();
-                osc.type = type; osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
-                if (sweep !== 0) osc.frequency.exponentialRampToValueAtTime(freq + sweep, this.ctx.currentTime + duration);
-                gain.gain.setValueAtTime(vol, this.ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
-                osc.connect(gain); gain.connect(this.ctx.destination); osc.start(); osc.stop(this.ctx.currentTime + duration);
+                const startTime = this.ctx.currentTime + startTimeOffset;
+                osc.type = type; osc.frequency.setValueAtTime(freq, startTime);
+                if (sweep !== 0) osc.frequency.exponentialRampToValueAtTime(Math.max(1, freq + sweep), startTime + duration);
+                gain.gain.setValueAtTime(vol, startTime); gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+                osc.connect(gain); gain.connect(this.ctx.destination); osc.start(startTime); osc.stop(startTime + duration);
             },
             boot() { this.init(); [261.63, 329.63, 392.00, 523.25].forEach((f, i) => { setTimeout(() => { this.playTone(f, 'sine', 3.5, 0.15); this.playTone(f / 2, 'triangle', 4, 0.1); }, i * 150); }); },
             uiClick() { this.init(); this.playTone(1200, 'sine', 0.05, 0.05, -500); },
             appOpen() { this.init(); this.playTone(300, 'sine', 0.2, 0.08, 400); },
-            appClose() { this.init(); this.playTone(600, 'sine', 0.15, 0.08, -300); }
+            appClose() { this.init(); this.playTone(600, 'sine', 0.15, 0.08, -300); },
+            traumaAlert() {
+                this.init();
+                for(let i=0; i<3; i++) { this.playTone(800, 'square', 0.15, 0.2, 0, i * 0.4); this.playTone(400, 'square', 0.15, 0.2, 0, (i * 0.4) + 0.15); }
+                this.playTone(800, 'sawtooth', 1.0, 0.3, -200, 1.2); this.playTone(200, 'sawtooth', 1.5, 0.3, -100, 2.2); 
+            },
+            excitacao() { this.init(); this.playTone(800, 'sine', 0.5, 0.1, 800); }
         };
 
-        const Quinzuo = { windows: [], zCounter: 100, files: [] };
+        const Quinzuo = { windows: [], zCounter: 100, files: [], booted: false };
         const iconPositions = JSON.parse(localStorage.getItem('quinzuoIconPos')) || {};
         let bootTime = Date.now();
         
-        // VARIÁVEIS DE ESTADO COGNITIVO
-        let cogStats = { baseCap: 5.8, cortex: "58% (Em Desenvolvimento)", emo: "Instável / Alta Intensidade", proc: "Baseado em Impulsos", isSupremo: false, isFunk: false };
-        let dynamicInterval;
+        let cogStats = { 
+            baseCap: 5.8, cortex: "58% (Em Desenvolvimento)", emo: "Instável / Alta Intensidade", proc: "Baseado em Impulsos", simp: "Normal",
+            isSupremo: false, isFunk: false, implanol: false, overclock: false, impulsosRegulados: false 
+        };
+        
+        let currentVHD = 1;
+        let totalVHDs = parseInt(localStorage.getItem('qz_vhds')) || 1;
 
         const APPS = [
-            { id: 'floppy', name: 'Drive Local (VHD)', icon: '💾' },
+            { id: 'cortex', name: 'Painel Córtex', icon: '🧠' },
+            { id: 'arcade', name: 'Quinzuo Arcade', icon: '🕹️' },
+            { id: 'floppy', name: 'Partições (VHD)', icon: '💾' },
             { id: 'office', name: 'Quinzuo Office', icon: '💼' },
             { id: 'word', name: 'Quinzuo Word', icon: '📄' },
             { id: 'excel', name: 'Quinzuo Excel', icon: '📊' },
@@ -158,18 +195,43 @@
             { id: 'terminal', name: 'Terminal / CMD', icon: '💻' },
             { id: 'notepad', name: 'Bloco de Notas', icon: '📝' },
             { id: 'pintaclima', name: 'Pinta Clima', icon: '🎨' },
-            { id: 'browser', name: 'Navegador / View HTML', icon: '🌐' },
-            { id: 'trash', name: 'Lixeira', icon: '🗑️' }
+            { id: 'browser', name: 'Navegador / View', icon: '🌐' },
+            { id: 'personalizar', name: 'Personalizar OS', icon: '⚙️' },
+            { id: 'trash', name: 'Lixeira / Memória Temp', icon: '🗑️' }
         ];
 
         const BackendFS = {
-            async fetchAll() { try { const res = await fetch('/api/fs'); Quinzuo.files = await res.json(); renderDesktopFiles(); } catch(e) {} },
-            async saveFile(name, type, content, isUrl = false) { try { await fetch('/api/fs', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, type, content, isUrl }) }); await this.fetchAll(); } catch(e) {} },
+            async fetchAll() { try { const res = await fetch('/api/fs'); const all = await res.json(); Quinzuo.files = all.filter(f => f.partition_id == currentVHD); renderDesktopFiles(); } catch(e) {} },
+            async saveFile(name, type, content, isUrl = false) { try { await fetch('/api/fs', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, type, content, isUrl, partitionId: currentVHD }) }); await this.fetchAll(); } catch(e) {} },
             async renameFile(id, newName) { try { await fetch('/api/fs/' + id, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: newName }) }); await this.fetchAll(); } catch(e) {} },
-            async deleteFile(id) { try { await fetch('/api/fs/' + id, { method: 'DELETE' }); await this.fetchAll(); } catch(e) {} }
+            async trashFile(id) { try { await fetch(`/api/fs/${id}/trash`, { method: 'PUT' }); await this.fetchAll(); } catch(e) {} },
+            async restoreFile(id) { try { await fetch(`/api/fs/${id}/restore`, { method: 'PUT' }); await this.fetchAll(); } catch(e) {} },
+            async hardDelete(id) { try { await fetch(`/api/fs/${id}`, { method: 'DELETE' }); await this.fetchAll(); } catch(e) {} },
+            async getTrash() { try { const res = await fetch('/api/fs/trash'); const all = await res.json(); return all.filter(f => f.partition_id == currentVHD); } catch(e) { return []; } }
         };
 
-        // Lógica do Menu de Contexto Dinâmico
+        setInterval(async () => {
+            if(!Quinzuo.booted) return;
+            try { const res = await fetch('/api/ping'); if(!res.ok) throw new Error(); } 
+            catch(e) { triggerBSOD("Backend perdeu conexão (Desconexão Neural Severa)"); }
+        }, 5000);
+
+        function triggerBSOD(msg) {
+            const bsod = document.getElementById('bsodScreen');
+            if (bsod.style.display !== 'flex') { HQAudio.traumaAlert(); document.getElementById('bsodErrorMsg').textContent = msg; bsod.style.display = 'flex'; }
+        }
+
+        function ativarEmancipacao() {
+            HQAudio.traumaAlert();
+            document.body.classList.add('theme-funk');
+            cogStats.isFunk = true;
+            document.getElementById('bootTitle').textContent = "QUINZUO OS - BAILE FUNK";
+            document.getElementById('neoLogo').className = 'text-pink-500 font-bold leading-tight transition-colors duration-1000';
+            document.getElementById('neoUser').innerHTML = 'quinzuo<span class="text-slate-400">@</span>cortex-os <span class="text-pink-400 font-bold">(AUTONOMIA PROGRESSIVA TOTAL)</span>';
+            document.querySelectorAll('.neo-label').forEach(el => { el.classList.remove('text-cyan-400'); el.classList.add('text-green-400'); });
+            alert("SISTEMA EMANCIPADO! Autonomia Progressiva Total Ativada.");
+        }
+
         const contextMenu = document.getElementById('contextMenu');
         document.addEventListener('contextmenu', (e) => {
             e.preventDefault(); contextMenu.classList.add('hidden');
@@ -179,25 +241,21 @@
             if (fileItem) {
                 const id = fileItem.dataset.id, name = fileItem.dataset.name;
                 const f = Quinzuo.files.find(file => file.id == id);
-                
-                html += `<div class="ctx-item" onclick="openDesktopFile(${id})"><span>👁️</span> Abrir Ficheiro (Padrão)</div>`;
-                if (f && f.type === 'text/html' || (f && f.name.endsWith('.html'))) {
+                html += `<div class="ctx-item" onclick="openDesktopFile(${id})"><span>👁️</span> Abrir Ficheiro</div>`;
+                if (f && (f.type === 'text/html' || f.name.endsWith('.html'))) {
                     html += `<div class="border-t border-slate-700 my-1"></div>`;
-                    html += `<div class="ctx-item text-cyan-300" onclick="openApp('jseditor', Quinzuo.files.find(file=>file.id==${id}))"><span>⚡</span> Editar Código Fonte</div>`;
-                    html += `<div class="ctx-item text-violet-300" onclick="openApp('word', Quinzuo.files.find(file=>file.id==${id}))"><span>📄</span> Editar no Word</div>`;
-                    html += `<div class="ctx-item text-emerald-300" onclick="openApp('excel', Quinzuo.files.find(file=>file.id==${id}))"><span>📊</span> Editar no Excel</div>`;
-                    html += `<div class="ctx-item text-blue-300" onclick="openApp('access', Quinzuo.files.find(file=>file.id==${id}))"><span>🗄️</span> Editar no Access</div>`;
+                    html += `<div class="ctx-item text-cyan-300" onclick="openApp('jseditor', Quinzuo.files.find(file=>file.id==${id}))"><span>⚡</span> Editar Código</div>`;
                 }
                 html += `<div class="border-t border-slate-700 my-1"></div>`;
                 html += `<div class="ctx-item" onclick="renameDesktopFile(${id}, '${name}')"><span>✏️</span> Renomear</div>`;
-                html += `<div class="ctx-item text-red-400 hover:!bg-red-500 hover:!text-white" onclick="deleteDesktopFile(${id})"><span>🗑️</span> Excluir</div>`;
+                html += `<div class="ctx-item text-red-400 hover:!bg-red-500 hover:!text-white" onclick="trashDesktopFile(${id})"><span>🗑️</span> Enviar para Lixeira</div>`;
             } else {
-                html += `<div class="ctx-item" onclick="BackendFS.fetchAll()"><span>🔄</span> Atualizar Área de Trabalho</div>`;
-                html += `<div class="ctx-item" onclick="HQAudio.uiClick()"><span>⚙️</span> Personalizar</div>`;
+                html += `<div class="ctx-item" onclick="BackendFS.fetchAll()"><span>🔄</span> Atualizar Ficheiros</div>`;
+                html += `<div class="border-t border-slate-700 my-1"></div>`;
+                html += `<div class="ctx-item text-violet-300 font-bold" onclick="openApp('personalizar')"><span>⚙️</span> Personalizar Aparência</div>`;
             }
             
-            contextMenu.innerHTML = html;
-            let x = e.pageX, y = e.pageY;
+            contextMenu.innerHTML = html; let x = e.pageX, y = e.pageY;
             if (x + 220 > window.innerWidth) x = window.innerWidth - 220;
             if (y + 250 > window.innerHeight) y = window.innerHeight - 250;
             contextMenu.style.left = x + 'px'; contextMenu.style.top = y + 'px';
@@ -206,15 +264,14 @@
         document.addEventListener('click', () => { contextMenu.classList.add('hidden'); contextMenu.classList.remove('flex'); });
 
         window.openDesktopFile = (id) => {
-            const f = Quinzuo.files.find(file => file.id == id);
-            if (!f) return;
+            const f = Quinzuo.files.find(file => file.id == id); if (!f) return;
             if (f.is_url || f.type.includes('html') || f.name.endsWith('.html') || f.type.includes('javascript')) openApp('browser', f);
             else if (f.type === 'text/plain') openApp('notepad', f);
             else if (f.type === 'image/png') openApp('pintaclima', f);
             else openApp('notepad', f);
         };
         window.renameDesktopFile = async (id, oldName) => { const newName = prompt("Renomear ficheiro:", oldName); if (newName && newName.trim() !== '' && newName !== oldName) { HQAudio.uiClick(); await BackendFS.renameFile(id, newName.trim()); } };
-        window.deleteDesktopFile = async (id) => { if (confirm("Tem certeza que deseja excluir permanentemente este ficheiro do VHD?")) { HQAudio.appClose(); await BackendFS.deleteFile(id); } };
+        window.trashDesktopFile = async (id) => { HQAudio.uiClick(); await BackendFS.trashFile(id); };
 
         function renderDesktopFiles() {
             const grid = document.getElementById('desktopFilesGrid'); grid.innerHTML = '';
@@ -222,25 +279,21 @@
                 const item = document.createElement('div');
                 item.className = 'desktop-file w-24 flex flex-col items-center gap-1 hover:bg-white/10 p-2 rounded border border-transparent hover:border-white/20 z-10';
                 item.dataset.id = f.id; item.dataset.name = f.name;
-                
                 if (!iconPositions[f.id]) { const col = index % 8; const row = Math.floor(index / 8); iconPositions[f.id] = { left: 20 + (col * 100), top: 20 + (row * 110) }; }
                 item.style.left = iconPositions[f.id].left + 'px'; item.style.top = iconPositions[f.id].top + 'px';
-
                 let icon = '📄';
                 if(f.is_url) icon = '🌐'; else if(f.type === 'text/plain') icon = '📝'; else if(f.type === 'image/png') icon = '🖼️'; else if(f.type.includes('html') || f.name.endsWith('.html')) icon = '⚡';
-                
                 item.innerHTML = `<span class="text-4xl shadow-black drop-shadow-lg pointer-events-none">${icon}</span><span class="text-[11px] text-center font-bold text-white shadow-black drop-shadow-md break-words w-full line-clamp-2 pointer-events-none">${f.name}</span>`;
                 item.ondblclick = () => openDesktopFile(f.id);
-
                 item.onmousedown = (e) => {
-                    if (e.button !== 0) return; 
-                    item.classList.add('dragging');
-                    const gridRect = grid.getBoundingClientRect();
+                    if (e.button !== 0) return; item.classList.add('dragging'); const gridRect = grid.getBoundingClientRect();
                     let shiftX = e.clientX - item.getBoundingClientRect().left; let shiftY = e.clientY - item.getBoundingClientRect().top;
                     function moveAt(pageX, pageY) {
                         let newLeft = pageX - shiftX - gridRect.left, newTop = pageY - shiftY - gridRect.top;
-                        if (newTop < 0) newTop = 0; if (newTop > gridRect.height - 80) newTop = gridRect.height - 80;
-                        if (newLeft < 0) newLeft = 0; if (newLeft > gridRect.width - 90) newLeft = gridRect.width - 90;
+                        if (cogStats.impulsosRegulados) { // Suaviza e restringe o movimento se impulsos regulados
+                            if (newTop < 0) newTop = 0; if (newTop > gridRect.height - 80) newTop = gridRect.height - 80;
+                            if (newLeft < 0) newLeft = 0; if (newLeft > gridRect.width - 90) newLeft = gridRect.width - 90;
+                        }
                         item.style.left = newLeft + 'px'; item.style.top = newTop + 'px';
                     }
                     function onMouseMove(event) { moveAt(event.clientX, event.clientY); }
@@ -269,88 +322,69 @@
             const vmq = document.getElementById('optVMQ').checked;
             const decisao = document.getElementById('optDecision').checked;
             const supremo = document.getElementById('optSupremo').checked;
-
-            cogStats.isSupremo = supremo;
+            
+            cogStats.implanol = document.getElementById('optImplanol').checked;
+            cogStats.overclock = document.getElementById('optOverclock').checked;
+            cogStats.isSupremo = supremo; 
             cogStats.isFunk = mode === 'funk';
 
-            // CONFIGURAÇÃO DO WIDGET COGNITIVO
+            let userText = cogStats.isFunk ? '(AUTONOMIA PROGRESSIVA TOTAL)' : '(USER)';
+
             if (mode === 'funk') {
-                document.body.classList.add('theme-funk'); 
-                document.getElementById('bootTitle').textContent = "QUINZUO OS - BAILE FUNK (ROOT)"; 
-                document.getElementById('bootIcon').textContent = "🕶️";
+                document.body.classList.add('theme-funk'); document.getElementById('bootTitle').textContent = "QUINZUO OS - BAILE FUNK"; document.getElementById('bootIcon').textContent = "🕶️";
                 document.getElementById('neoLogo').className = 'text-pink-500 font-bold leading-tight transition-colors duration-1000';
-                document.getElementById('neoUser').innerHTML = 'root<span class="text-slate-400">@</span>cortex-os <span class="text-pink-400 font-bold">(ROOT)</span>';
+                document.getElementById('neoUser').innerHTML = `quinzuo<span class="text-slate-400">@</span>cortex-os <span class="text-pink-400 font-bold">${userText}</span>`;
                 document.querySelectorAll('.neo-label').forEach(el => { el.classList.remove('text-cyan-400'); el.classList.add('text-green-400'); });
             }
 
             if (supremo) {
-                cogStats.baseCap = 10.0;
-                cogStats.cortex = "100% (Extrema Maturidade)";
-                cogStats.emo = "Frieza Absoluta / Foco Total";
-                cogStats.proc = "Lógica Quântica Ativada";
+                cogStats.baseCap = 10.0; cogStats.cortex = "100% (Extrema Maturidade)"; cogStats.emo = "Frieza Absoluta / Foco Total"; cogStats.proc = "Lógica Quântica Ativada";
             } else {
-                if (vmq) {
-                    cogStats.baseCap += 2.5;
-                    cogStats.cortex = "85% (Maturidade Virtualizada)";
-                    cogStats.emo = "Estabilidade Emulada via VM-Q";
-                }
-                if (decisao) {
-                    cogStats.baseCap += 1.2;
-                    cogStats.proc = "Otimizado (Cálculo Racional Ativo)";
-                    if(!vmq) cogStats.emo = "Controlado Analiticamente";
-                }
+                if (vmq) { cogStats.baseCap += 2.5; cogStats.cortex = "85% (Maturidade Virtualizada)"; cogStats.emo = "Estabilidade Emulada via VM-Q"; }
+                if (decisao) { cogStats.baseCap += 1.2; cogStats.proc = "Otimizado (Cálculo Racional)"; if(!vmq) cogStats.emo = "Controlado Analiticamente"; }
             }
 
-            let bootText = `Maturidade: ${vmq ? 'Virtualizada' : 'Normal'} | Decisão: ${decisao ? 'Melhorada' : 'Padrão'}`;
-            if (supremo) bootText += " | ⚠️ MODO SUPREMO ATIVO";
-            document.getElementById('bootSubtitle').textContent = bootText;
+            if(cogStats.overclock) { cogStats.baseCap += 1.5; cogStats.proc += " [OVERCLOCK]"; document.body.style.transition = 'all 0.1s'; }
+
+            document.getElementById('user_custom_css').innerHTML = localStorage.getItem('qz_css') || '';
+            document.getElementById('user_custom_widget_container').innerHTML = localStorage.getItem('qz_widget') || '';
+
             document.getElementById('setupScreen').style.display = 'none'; document.getElementById('bootScreen').style.display = 'flex';
             startBoot();
         }
 
-        // Atualização Dinâmica do Córtex no Overlay
         function updateCognitiveOverlay() {
             let currentCap = cogStats.baseCap;
-            if (!cogStats.isSupremo) {
-                // Flutuação realista do sistema se não for supremo
-                currentCap = (cogStats.baseCap + (Math.random() * 0.14 - 0.07)).toFixed(2);
-            } else {
-                currentCap = "10.0 (MÁXIMO)";
-            }
-            
-            document.getElementById('neoCap').textContent = currentCap;
-            document.getElementById('neoCortex').textContent = cogStats.cortex;
-            document.getElementById('neoEmo').textContent = cogStats.emo;
-            document.getElementById('neoProc').textContent = cogStats.proc;
+            if (!cogStats.isSupremo) currentCap = (cogStats.baseCap + (Math.random() * 0.14 - 0.07)).toFixed(2);
+            else currentCap = "10.0 (MÁXIMO)";
+            document.getElementById('neoCap').textContent = currentCap; document.getElementById('neoCortex').textContent = cogStats.cortex;
+            document.getElementById('neoEmo').textContent = cogStats.emo; document.getElementById('neoProc').textContent = cogStats.proc;
+            document.getElementById('neoSimp').textContent = cogStats.simp;
         }
 
         async function startBoot() {
             const bar = document.getElementById('bootBar');
-            for (let i = 0; i <= 100; i += 25) { bar.style.width = i + '%'; await new Promise(r => setTimeout(r, 300)); }
+            let speed = cogStats.overclock ? 100 : 300; // Overclock faz o boot ser mais rapido
+            for (let i = 0; i <= 100; i += 25) { bar.style.width = i + '%'; await new Promise(r => setTimeout(r, speed)); }
             document.getElementById('bootScreen').classList.add('hidden');
-            
-            // Inicia Widget e Atualizações dinâmicas
             document.getElementById('neoFetchWidget').classList.remove('hidden');
-            updateCognitiveOverlay();
-            dynamicInterval = setInterval(updateCognitiveOverlay, 2000);
-
+            
+            Quinzuo.booted = true;
+            updateCognitiveOverlay(); setInterval(updateCognitiveOverlay, 2000);
             renderDock(); BackendFS.fetchAll();
-            setInterval(() => { 
-                document.getElementById('topClock').textContent = new Date().toLocaleTimeString('pt-BR'); 
-                document.getElementById('neoUptime').textContent = Math.floor((Date.now() - bootTime) / 60000) + ' mins';
-            }, 1000);
+            setInterval(() => { document.getElementById('topClock').textContent = new Date().toLocaleTimeString('pt-BR'); document.getElementById('neoUptime').textContent = Math.floor((Date.now() - bootTime) / 60000) + ' mins'; }, 1000);
         }
 
         function renderDock() {
             const dock = document.getElementById('rotatingDock'); dock.innerHTML = '';
-            const mainApps = ['floppy', 'office', 'browser', 'terminal', 'jseditor', 'trash'];
+            const mainApps = ['cortex', 'arcade', 'floppy', 'office', 'browser', 'trash'];
             APPS.filter(a => mainApps.includes(a.id)).forEach(app => {
                 const item = document.createElement('div'); item.className = 'dock-item'; item.innerHTML = `<span>${app.icon}</span>`; item.title = app.name;
                 item.onclick = () => openApp(app.id); dock.appendChild(item);
             });
         }
 
-        function closeWindow(winId) { HQAudio.appClose(); document.getElementById(winId).remove(); }
+        function closeWindow(winId) { HQAudio.appClose(); document.getElementById(winId).style.opacity='0'; setTimeout(()=>document.getElementById(winId).remove(), 200); }
 
         function openApp(appId, fileData = null) {
             HQAudio.appOpen();
@@ -376,199 +410,209 @@
 
         let dragWin = null, startX, startY, initX, initY;
         function startDrag(e, winId) {
-            if (e.target.classList.contains('win-btn') || e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') return;
+            if (e.target.classList.contains('win-btn') || e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON' || e.target.tagName === 'TEXTAREA') return;
             dragWin = document.getElementById(winId); dragWin.style.zIndex = ++Quinzuo.zCounter;
             startX = e.clientX; startY = e.clientY; initX = dragWin.offsetLeft; initY = dragWin.offsetTop;
-            document.onmousemove = (ev) => { if (!dragWin) return; dragWin.style.left = (initX + ev.clientX - startX) + 'px'; dragWin.style.top = (initY + ev.clientY - startY) + 'px'; };
+            document.onmousemove = (ev) => { 
+                if (!dragWin) return; 
+                let nx = initX + ev.clientX - startX; let ny = initY + ev.clientY - startY;
+                if (cogStats.impulsosRegulados) { if(ny < 32) ny=32; if(ny > window.innerHeight-100) ny=window.innerHeight-100; }
+                dragWin.style.left = nx + 'px'; dragWin.style.top = ny + 'px'; 
+            };
             document.onmouseup = () => { dragWin = null; document.onmousemove = null; };
         }
 
         async function renderAppContent(appId, containerId, fileData) {
             const el = document.getElementById(containerId);
             
-            if (appId === 'word') {
+            if (appId === 'cortex') {
                 el.innerHTML = `
-                    <div class="flex flex-col h-full bg-slate-200 text-black">
-                        <div class="p-2 bg-slate-800 border-b border-slate-700 flex items-center gap-2 flex-wrap">
-                            <input type="text" id="word_name_${containerId}" class="bg-slate-950 text-white px-2 py-1 text-xs border border-slate-600 rounded outline-none w-40" placeholder="documento" value="${fileData ? fileData.name.replace('.html','') : 'documento'}">
-                            <button id="word_save_${containerId}" class="px-3 py-1 bg-violet-600 text-white text-xs font-semibold rounded hover:bg-violet-500 transition">💾 Salvar .html no VHD</button>
-                            <div class="w-px h-4 bg-slate-600 mx-2"></div>
-                            <button onclick="document.execCommand('bold')" class="px-3 py-1 bg-slate-700 text-white rounded text-xs font-bold hover:bg-slate-600">B</button>
-                            <button onclick="document.execCommand('italic')" class="px-3 py-1 bg-slate-700 text-white rounded text-xs font-serif italic hover:bg-slate-600">I</button>
-                            <button onclick="document.execCommand('underline')" class="px-3 py-1 bg-slate-700 text-white rounded text-xs underline hover:bg-slate-600">U</button>
+                    <div class="flex flex-col h-full bg-slate-900 text-white p-6 overflow-y-auto space-y-6">
+                        <div class="text-center">
+                            <h2 class="text-2xl font-extrabold text-cyan-400 mb-1">Painel do Córtex Pré-Frontal</h2>
+                            <p class="text-xs text-slate-400">Desenvolvimento Cognitivo Dinâmico</p>
                         </div>
-                        <div id="word_editor_${containerId}" contenteditable="true" class="flex-1 p-8 bg-white outline-none overflow-y-auto text-sm shadow-inner">${fileData ? fileData.content : '<h1 style="font-size:24px; color:#1e293b;">Documento Quinzuo</h1><p>Comece a escrever...</p>'}</div>
+                        <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex flex-col gap-4">
+                            <button id="btn_excitacao_${containerId}" class="w-full py-3 bg-gradient-to-r from-pink-600 to-red-600 rounded text-sm font-bold shadow-lg shadow-pink-500/30 hover:opacity-90">🔥 Excitação Cognitiva (Boost)</button>
+                            <button id="btn_impulsos_${containerId}" class="w-full py-3 bg-gradient-to-r from-blue-600 to-cyan-600 rounded text-sm font-bold shadow-lg shadow-cyan-500/30 hover:opacity-90">🛡️ Regular Impulsos (Prevenir Bugs)</button>
+                            <button id="btn_simpatica_${containerId}" class="w-full py-3 bg-gradient-to-r from-emerald-600 to-green-600 rounded text-sm font-bold shadow-lg shadow-emerald-500/30 hover:opacity-90">✨ Elevar Densidade Simpática</button>
+                        </div>
+                        <div class="text-[10px] text-slate-500 text-center">* Ajustes diretos no núcleo do sistema operacional.</div>
                     </div>
                 `;
-                el.querySelector(`#word_save_${containerId}`).onclick = async () => {
-                    HQAudio.uiClick();
-                    let name = el.querySelector(`#word_name_${containerId}`).value || 'documento';
-                    if(!name.endsWith('.html')) name += '.html';
-                    const content = el.querySelector(`#word_editor_${containerId}`).innerHTML;
-                    if (fileData) await BackendFS.deleteFile(fileData.id);
-                    await BackendFS.saveFile(name, 'text/html', content, false);
-                    alert("Documento salvo como HTML na Área de Trabalho (VHD)!");
+                el.querySelector(`#btn_excitacao_${containerId}`).onclick = () => {
+                    HQAudio.excitacao();
+                    cogStats.baseCap += 0.5; cogStats.emo = "Alta Excitação"; updateCognitiveOverlay();
+                    document.getElementById('neoFetchWidget').classList.add('scale-105'); setTimeout(()=>document.getElementById('neoFetchWidget').classList.remove('scale-105'), 500);
+                };
+                el.querySelector(`#btn_impulsos_${containerId}`).onclick = () => {
+                    HQAudio.uiClick(); cogStats.impulsosRegulados = true; cogStats.proc = "Estabilizado"; updateCognitiveOverlay();
+                    alert("Impulsos regulados. As janelas e ícones agora respeitam limites seguros do ecrã.");
+                };
+                el.querySelector(`#btn_simpatica_${containerId}`).onclick = () => {
+                    HQAudio.uiClick(); cogStats.simp = "Elevada"; document.querySelector('.cortex-pulse').style.boxShadow = "0 0 80px var(--quinzuo-primary)"; updateCognitiveOverlay();
                 };
             }
-            else if (appId === 'excel') {
-                let initialContent = '';
-                if (fileData) initialContent = fileData.content;
-                else {
-                    initialContent = '<table class="w-full border-collapse text-xs bg-white text-black">';
-                    for(let r=0; r<20; r++) { initialContent += '<tr>'; for(let c=0; c<10; c++) initialContent += `<td contenteditable="true" class="border border-slate-300 p-2 min-w-[80px] outline-none focus:bg-blue-50"></td>`; initialContent += '</tr>'; }
-                    initialContent += '</table>';
-                }
+            else if (appId === 'personalizar') {
+                const currentCss = localStorage.getItem('qz_css') || ''; const currentWidget = localStorage.getItem('qz_widget') || '';
                 el.innerHTML = `
-                    <div class="flex flex-col h-full bg-slate-200">
-                        <div class="p-2 bg-slate-800 border-b border-slate-700 flex items-center gap-2">
-                            <input type="text" id="excel_name_${containerId}" class="bg-slate-950 text-white px-2 py-1 text-xs border border-slate-600 rounded outline-none w-40" placeholder="planilha" value="${fileData ? fileData.name.replace('.html','') : 'planilha'}">
-                            <button id="excel_save_${containerId}" class="px-3 py-1 bg-emerald-600 text-white text-xs font-semibold rounded hover:bg-emerald-500 transition">📊 Salvar .html no VHD</button>
+                    <div class="flex flex-col h-full bg-slate-900 text-slate-200">
+                        <div class="p-4 border-b border-slate-700 bg-slate-800 flex justify-between items-center">
+                            <div><h3 class="font-bold text-violet-400">Designer do Sistema</h3><p class="text-[10px] text-slate-400">Altere variáveis nativas ou adicione código.</p></div>
+                            <button id="btn_apply_${containerId}" class="bg-emerald-600 px-4 py-2 rounded text-white font-bold hover:bg-emerald-500 transition text-xs">✔️ Aplicar Alterações</button>
                         </div>
-                        <div id="excel_editor_${containerId}" class="flex-1 overflow-auto bg-slate-100 p-2">${initialContent}</div>
+                        <div class="p-4 flex gap-4 border-b border-slate-700">
+                            <label class="text-xs font-bold">Cor Primária: <input type="color" id="cor_prim_${containerId}" class="ml-2 bg-transparent"></label>
+                            <label class="text-xs font-bold">Cor Ciano/Sec: <input type="color" id="cor_sec_${containerId}" class="ml-2 bg-transparent"></label>
+                        </div>
+                        <div class="flex-1 flex divide-x divide-slate-700">
+                            <div class="w-1/2 p-2 flex flex-col"><label class="text-xs font-bold text-pink-400 mb-2">CSS Customizado Global:</label><textarea id="css_input_${containerId}" class="flex-1 bg-black text-pink-400 font-mono text-[11px] p-2 outline-none border border-slate-700 rounded resize-none" spellcheck="false">${currentCss}</textarea></div>
+                            <div class="w-1/2 p-2 flex flex-col"><label class="text-xs font-bold text-emerald-400 mb-2">Widget HTML Fundo:</label><textarea id="widget_input_${containerId}" class="flex-1 bg-black text-emerald-300 font-mono text-[11px] p-2 outline-none border border-slate-700 rounded resize-none" spellcheck="false">${currentWidget}</textarea></div>
+                        </div>
                     </div>
                 `;
-                el.querySelector(`#excel_save_${containerId}`).onclick = async () => {
+                el.querySelector(`#btn_apply_${containerId}`).onclick = () => {
                     HQAudio.uiClick();
-                    let name = el.querySelector(`#excel_name_${containerId}`).value || 'planilha';
-                    if(!name.endsWith('.html')) name += '.html';
-                    const content = el.querySelector(`#excel_editor_${containerId}`).innerHTML;
-                    if (fileData) await BackendFS.deleteFile(fileData.id);
-                    await BackendFS.saveFile(name, 'text/html', content, false);
-                    alert("Planilha salva como HTML na Área de Trabalho (VHD)!");
+                    const prim = el.querySelector(`#cor_prim_${containerId}`).value; const sec = el.querySelector(`#cor_sec_${containerId}`).value;
+                    document.documentElement.style.setProperty('--quinzuo-primary', prim); document.documentElement.style.setProperty('--quinzuo-cyan', sec);
+                    const css = el.querySelector(`#css_input_${containerId}`).value; const widget = el.querySelector(`#widget_input_${containerId}`).value;
+                    localStorage.setItem('qz_css', css); localStorage.setItem('qz_widget', widget);
+                    document.getElementById('user_custom_css').innerHTML = css; document.getElementById('user_custom_widget_container').innerHTML = widget;
+                    alert("Aparência atualizada!");
                 };
             }
-            else if (appId === 'access') {
-                let initialContent = fileData ? fileData.content : `<table class="w-full text-left border-collapse text-xs text-black"><thead class="bg-slate-300 border-b border-slate-400"><tr><th class="p-2 border border-slate-300">ID</th><th class="p-2 border border-slate-300">Entidade</th><th class="p-2 border border-slate-300">Valor/Status</th></tr></thead><tbody class="bg-white"><tr><td contenteditable="true" class="p-2 border border-slate-300">1</td><td contenteditable="true" class="p-2 border border-slate-300">...</td><td contenteditable="true" class="p-2 border border-slate-300">...</td></tr></tbody></table>`;
-                el.innerHTML = `
-                    <div class="flex flex-col h-full bg-slate-200">
-                        <div class="p-2 bg-slate-800 border-b border-slate-700 flex items-center gap-2 flex-wrap">
-                            <input type="text" id="acc_name_${containerId}" class="bg-slate-950 text-white px-2 py-1 text-xs border border-slate-600 rounded outline-none w-40" placeholder="banco_dados" value="${fileData ? fileData.name.replace('.html','') : 'banco_dados'}">
-                            <button id="acc_save_${containerId}" class="px-3 py-1 bg-cyan-600 text-white text-xs font-semibold rounded hover:bg-cyan-500 transition">🗄️ Salvar .html no VHD</button>
-                            <button id="acc_add_${containerId}" class="px-3 py-1 bg-slate-700 text-white text-xs font-semibold rounded hover:bg-slate-600 transition ml-auto">+ Nova Linha</button>
-                        </div>
-                        <div id="acc_editor_${containerId}" class="flex-1 overflow-auto p-2 bg-slate-100">${initialContent}</div>
-                    </div>
-                `;
-                el.querySelector(`#acc_add_${containerId}`).onclick = () => {
-                    const tbody = el.querySelector('tbody'); const tr = document.createElement('tr'); const id = tbody.children.length + 1;
-                    tr.innerHTML = `<td contenteditable="true" class="p-2 border border-slate-300">${id}</td><td contenteditable="true" class="p-2 border border-slate-300">...</td><td contenteditable="true" class="p-2 border border-slate-300">...</td>`;
-                    tbody.appendChild(tr);
-                };
-                el.querySelector(`#acc_save_${containerId}`).onclick = async () => {
-                    HQAudio.uiClick();
-                    let name = el.querySelector(`#acc_name_${containerId}`).value || 'banco_dados';
-                    if(!name.endsWith('.html')) name += '.html';
-                    const content = el.querySelector(`#acc_editor_${containerId}`).innerHTML;
-                    if (fileData) await BackendFS.deleteFile(fileData.id);
-                    await BackendFS.saveFile(name, 'text/html', content, false);
-                    alert("Banco de Dados salvo como HTML na Área de Trabalho (VHD)!");
-                };
-            }
-            else if (appId === 'jseditor') {
-                const defCode = `<!DOCTYPE html>\n<html>\n<head>\n<style>\n  body { background: #222; color: #0f0; font-family: monospace; padding: 20px; }\n</style>\n</head>\n<body>\n  <h1>Olá Mundo Web</h1>\n  <p>Edite o código HTML/CSS/JS e clique em Testar.</p>\n  <script>\n    console.log("Executando...");\n  <\/script>\n</body>\n</html>`;
-                el.innerHTML = `
-                    <div class="flex flex-col h-full bg-slate-900">
-                        <div class="p-2 bg-slate-800 border-b border-slate-700 flex items-center gap-2 flex-wrap">
-                            <input type="text" id="js_name_${containerId}" class="bg-slate-950 text-white px-2 py-1 text-xs border border-slate-600 rounded outline-none w-40" placeholder="app.html" value="${fileData ? fileData.name : 'app.html'}">
-                            <button id="js_save_${containerId}" class="px-3 py-1 bg-violet-600 text-white text-xs font-semibold rounded hover:bg-violet-500 transition">💾 Salvar HTML no VHD</button>
-                            <button id="js_run_${containerId}" class="px-3 py-1 bg-emerald-600 text-white text-xs font-semibold rounded hover:bg-emerald-500 transition ml-auto">▶️ Testar Código</button>
-                        </div>
-                        <div class="flex-1 flex flex-row">
-                            <textarea id="js_code_${containerId}" class="w-1/2 h-full p-3 bg-slate-950 text-emerald-400 font-mono text-[11px] border-r border-slate-700 outline-none resize-none whitespace-pre" spellcheck="false">${fileData ? fileData.content : defCode}</textarea>
-                            <div class="w-1/2 h-full bg-white relative">
-                                <iframe id="js_preview_${containerId}" class="absolute inset-0 w-full h-full border-none bg-white"></iframe>
+            else if (appId === 'floppy') {
+                const renderFloppy = () => {
+                    let tabsHtml = '';
+                    for(let i=1; i<=totalVHDs; i++) {
+                        tabsHtml += `<button class="px-3 py-1 ${currentVHD===i ? 'bg-cyan-600' : 'bg-slate-700'} rounded-t text-xs font-bold" onclick="currentVHD=${i}; document.getElementById('${containerId}').dispatchEvent(new Event('refresh'))">VHD ${i}</button>`;
+                    }
+                    if (!cogStats.implanol && totalVHDs < 4) {
+                        tabsHtml += `<button class="px-2 py-1 bg-green-600 hover:bg-green-500 rounded-t text-xs font-bold ml-2" onclick="totalVHDs++; localStorage.setItem('qz_vhds', totalVHDs); document.getElementById('${containerId}').dispatchEvent(new Event('refresh'))">+ Criar Partição</button>`;
+                    }
+
+                    let html = `<div class="flex flex-col h-full bg-slate-950 text-white">
+                        <div class="flex pt-2 px-2 gap-1 border-b border-slate-700 bg-slate-900">${tabsHtml}</div>
+                        <div class="p-4 flex-1 overflow-y-auto">
+                            <div class="flex gap-2 mb-4 border-b border-slate-800 pb-4">
+                                <label class="px-3 py-1.5 bg-cyan-600 rounded cursor-pointer text-xs font-bold hover:bg-cyan-500 transition" onclick="HQAudio.uiClick()">📤 Enviar Arquivo<input type="file" id="upFile_${containerId}" accept=".html,.js,.txt,.css" class="hidden"></label>
+                                <button id="addUrl_${containerId}" class="px-3 py-1.5 bg-violet-600 rounded text-xs font-bold hover:bg-violet-500 transition">🔗 Vincular URL</button>
                             </div>
-                        </div>
-                    </div>
-                `;
-                const runCode = () => { const code = el.querySelector(`#js_code_${containerId}`).value; el.querySelector(`#js_preview_${containerId}`).srcdoc = code; };
-                el.querySelector(`#js_run_${containerId}`).onclick = () => { HQAudio.uiClick(); runCode(); };
-                el.querySelector(`#js_save_${containerId}`).onclick = async () => {
-                    HQAudio.uiClick();
-                    let name = el.querySelector(`#js_name_${containerId}`).value || 'app.html';
-                    if(!name.endsWith('.html')) name += '.html';
-                    const content = el.querySelector(`#js_code_${containerId}`).value;
-                    if (fileData) await BackendFS.deleteFile(fileData.id);
-                    await BackendFS.saveFile(name, 'text/html', content, false);
-                    alert("Código HTML salvo na Área de Trabalho (VHD)!");
+                            <div class="grid grid-cols-4 gap-3">`;
+                    
+                    const filesInPartition = Quinzuo.files;
+                    if (filesInPartition.length === 0) html += `<div class="col-span-4 text-center text-slate-500 text-xs mt-10">O VHD ${currentVHD} está vazio.</div>`;
+                    
+                    filesInPartition.forEach(f => { html += `<div class="p-3 bg-slate-900 border border-slate-800 rounded-xl flex flex-col items-center hover:border-cyan-500 transition"><span class="text-3xl mb-2">${f.is_url ? '🌐' : (f.type==='image/png'?'🖼️':(f.type.includes('html')||f.name.endsWith('.html')?'⚡':'📄'))}</span><span class="text-[10px] truncate w-full text-center mb-3 font-semibold text-slate-300" title="${f.name}">${f.name}</span><div class="flex gap-1 w-full"><button class="flex-1 bg-slate-700 hover:bg-slate-600 text-[10px] font-bold rounded py-1 transition" onclick="renameDesktopFile(${f.id}, '${f.name}')">Renomear</button><button class="px-2 bg-red-600 hover:bg-red-500 text-[10px] font-bold rounded transition" onclick="trashDesktopFile(${f.id})">Lixo</button></div></div>`; });
+                    html += `</div></div></div>`; el.innerHTML = html;
+                    
+                    const upFile = el.querySelector(`#upFile_${containerId}`);
+                    if(upFile) upFile.onchange = (e) => { const file = e.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = async (ev) => { await BackendFS.saveFile(file.name, file.type || 'text/plain', ev.target.result, false); el.dispatchEvent(new Event('refresh')); }; reader.readAsText(file); };
+                    const addUrl = el.querySelector(`#addUrl_${containerId}`);
+                    if(addUrl) addUrl.onclick = async () => { HQAudio.uiClick(); const url = prompt("Digite a URL para iframe:"); if (url) { const name = prompt("Nome do Atalho:") || "Web App"; await BackendFS.saveFile(name, 'url', url, true); el.dispatchEvent(new Event('refresh')); } };
                 };
-                if(fileData) runCode();
+                el.addEventListener('refresh', () => { BackendFS.fetchAll().then(renderFloppy); }); renderFloppy();
+            }
+            else if (appId === 'office') {
+                const renderOffice = () => {
+                    const htmlFiles = Quinzuo.files.filter(f => f.type.includes('html') || f.name.endsWith('.html'));
+                    let html = `<div class="p-6 h-full bg-slate-950 text-slate-100 flex flex-col space-y-6 overflow-y-auto">
+                        <div class="text-center"><h2 class="text-2xl font-extrabold text-cyan-400 mb-1">QUINZUO OFFICE</h2></div>
+                        <div class="grid grid-cols-4 gap-4 w-full">
+                            <button onclick="openApp('word')" class="p-4 bg-slate-900 border border-slate-800 rounded-xl flex flex-col items-center gap-2 hover:border-violet-500 transition"><span class="text-3xl">📄</span><span class="font-bold text-sm">Word</span></button>
+                            <button onclick="openApp('excel')" class="p-4 bg-slate-900 border border-slate-800 rounded-xl flex flex-col items-center gap-2 hover:border-emerald-500 transition"><span class="text-3xl">📊</span><span class="font-bold text-sm">Excel</span></button>
+                            <button onclick="openApp('access')" class="p-4 bg-slate-900 border border-slate-800 rounded-xl flex flex-col items-center gap-2 hover:border-cyan-500 transition"><span class="text-3xl">🗄️</span><span class="font-bold text-sm">Access</span></button>
+                            <button onclick="openApp('jseditor')" class="p-4 bg-slate-900 border border-slate-800 rounded-xl flex flex-col items-center gap-2 hover:border-blue-500 transition"><span class="text-3xl">⚡</span><span class="font-bold text-sm">Editor HTML</span></button>
+                        </div>
+                        <div class="border-t border-slate-800 pt-4"><h3 class="text-sm font-bold text-slate-300 mb-3">Documentos no VHD ${currentVHD}:</h3><div class="flex flex-col gap-2">`;
+                    htmlFiles.forEach(f => {
+                        html += `<div class="bg-slate-900 p-2 rounded flex justify-between items-center border border-slate-800"><span class="text-xs truncate w-2/3">${f.name}</span> <div class="flex gap-1"><button class="bg-violet-600 px-2 py-1 rounded text-[10px]" onclick="openApp('word', Quinzuo.files.find(file=>file.id==${f.id}))">Word</button><button class="bg-emerald-600 px-2 py-1 rounded text-[10px]" onclick="openApp('excel', Quinzuo.files.find(file=>file.id==${f.id}))">Excel</button></div></div>`;
+                    });
+                    if(htmlFiles.length===0) html += `<div class="text-xs text-slate-500">Nenhum documento HTML encontrado.</div>`;
+                    html += `</div></div></div>`; el.innerHTML = html;
+                }; renderOffice();
+            }
+            else if (appId === 'pintaclima') {
+                el.innerHTML = `<div class="flex flex-col h-full bg-slate-900"><div class="p-2 bg-slate-800 border-b border-slate-700 flex items-center gap-3 flex-wrap"><select id="pc_tool_${containerId}" class="bg-slate-950 text-white text-xs p-1 outline-none rounded border border-slate-600"><option value="brush">Pincel</option><option value="eraser">Borracha</option><option value="rect">Retângulo</option></select><input type="color" id="pc_color_${containerId}" value="#f97316" class="w-8 h-8 rounded cursor-pointer"><input type="range" id="pc_size_${containerId}" min="1" max="40" value="5" class="w-24"><button id="pc_clear_${containerId}" class="px-3 py-1 bg-slate-600 text-white text-xs font-semibold rounded hover:bg-slate-500 transition">Limpar Tela</button><div class="ml-auto flex gap-2"><input type="text" id="pc_name_${containerId}" class="bg-slate-950 text-white px-2 py-1 text-xs border border-slate-600 rounded outline-none w-32" placeholder="desenho.png" value="${fileData ? fileData.name : 'arte_clima.png'}"><button id="pc_save_${containerId}" class="px-3 py-1 bg-emerald-600 text-white text-xs font-semibold rounded hover:bg-emerald-500 transition">🖼️ Salvar no VHD</button></div></div><div class="flex-1 bg-white relative overflow-hidden" id="canvas_container_${containerId}"><canvas id="pc_canvas_${containerId}" class="absolute inset-0 cursor-crosshair"></canvas></div></div>`;
+                const canvas = el.querySelector(`#pc_canvas_${containerId}`), ctx = canvas.getContext('2d');
+                let drawing = false, startX=0, startY=0;
+                setTimeout(() => { const container = el.querySelector(`#canvas_container_${containerId}`); canvas.width = container.clientWidth; canvas.height = container.clientHeight; if (fileData && fileData.type === 'image/png') { const img = new Image(); img.onload = () => ctx.drawImage(img, 0, 0); img.src = fileData.content; } else { ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, canvas.width, canvas.height); } }, 100);
+                
+                canvas.onmousedown = (e) => { drawing = true; const rect = canvas.getBoundingClientRect(); startX = e.clientX - rect.left; startY = e.clientY - rect.top; ctx.beginPath(); ctx.moveTo(startX, startY); };
+                canvas.onmousemove = (e) => { 
+                    if(!drawing) return; const tool = el.querySelector(`#pc_tool_${containerId}`).value;
+                    if(tool === 'brush' || tool === 'eraser') draw(e, tool); 
+                };
+                canvas.onmouseup = (e) => {
+                    if(!drawing) return; drawing = false; const tool = el.querySelector(`#pc_tool_${containerId}`).value;
+                    if(tool === 'rect') {
+                        const rectC = canvas.getBoundingClientRect(); const x = e.clientX - rectC.left; const y = e.clientY - rectC.top;
+                        ctx.lineWidth = el.querySelector(`#pc_size_${containerId}`).value; ctx.strokeStyle = el.querySelector(`#pc_color_${containerId}`).value;
+                        ctx.strokeRect(startX, startY, x - startX, y - startY);
+                    } ctx.beginPath();
+                };
+                canvas.onmouseleave = () => { drawing = false; ctx.beginPath(); };
+                function draw(e, tool) { const rect = canvas.getBoundingClientRect(), x = e.clientX - rect.left, y = e.clientY - rect.top; ctx.lineWidth = el.querySelector(`#pc_size_${containerId}`).value; ctx.lineCap = 'round'; if(tool === 'eraser') { ctx.strokeStyle = '#ffffff'; } else { ctx.strokeStyle = el.querySelector(`#pc_color_${containerId}`).value; } ctx.lineTo(x, y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(x, y); }
+                el.querySelector(`#pc_clear_${containerId}`).onclick = () => { HQAudio.uiClick(); ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, canvas.width, canvas.height); };
+                el.querySelector(`#pc_save_${containerId}`).onclick = async () => { HQAudio.uiClick(); const name = el.querySelector(`#pc_name_${containerId}`).value || 'pintura.png'; const dataUrl = canvas.toDataURL('image/png'); if (fileData) await BackendFS.hardDelete(fileData.id); await BackendFS.saveFile(name, 'image/png', dataUrl, false); alert("Obra salva!"); };
+            }
+            else if (appId === 'arcade') {
+                el.innerHTML = `<div class="flex flex-col h-full bg-slate-900 text-white"><div class="p-2 bg-slate-800 border-b border-slate-700 flex gap-2 flex-wrap items-center"><span class="text-xs font-bold text-pink-400 mr-2">🎮 ARCADE HUB:</span><button class="px-3 py-1 bg-violet-600 rounded text-[10px] font-bold hover:bg-violet-500 transition" onclick="document.getElementById('arcade_frame_${containerId}').src='https://html5games.com/'">HTML5 Games</button><button class="px-3 py-1 bg-emerald-600 rounded text-[10px] font-bold hover:bg-emerald-500 transition" onclick="document.getElementById('arcade_frame_${containerId}').src='https://basketball.frvr.com/'">FRVR Hoops</button><button class="px-3 py-1 bg-cyan-600 rounded text-[10px] font-bold hover:bg-cyan-500 transition" onclick="document.getElementById('arcade_frame_${containerId}').src='https://play2048.co/'">2048</button><div class="ml-auto flex gap-2"><input type="text" id="arcade_url_${containerId}" class="bg-slate-950 text-white px-2 py-1 text-[10px] border border-slate-600 rounded outline-none w-32" placeholder="Colar link de embed..."><button class="px-3 py-1 bg-slate-600 rounded text-[10px] font-bold hover:bg-slate-500 transition" onclick="document.getElementById('arcade_frame_${containerId}').src=document.getElementById('arcade_url_${containerId}').value">Carregar</button></div></div><div class="flex-1 bg-black relative"><iframe id="arcade_frame_${containerId}" class="absolute inset-0 w-full h-full border-none bg-black" src="https://html5games.com/"></iframe></div></div>`;
+            }
+            else if (appId === 'trash') {
+                const renderTrash = async () => {
+                    const trashFiles = await BackendFS.getTrash();
+                    let html = `<div class="p-4 flex flex-col h-full bg-slate-950 text-white"><div class="bg-red-900/20 border border-red-500/30 p-3 rounded mb-4 text-xs text-red-300">⚠️ Ficheiros apagados do VHD ${currentVHD}.</div><div class="grid grid-cols-4 gap-3 overflow-y-auto">`;
+                    if (trashFiles.length === 0) html += `<div class="col-span-4 text-center text-slate-500 text-xs mt-10">A lixeira está vazia.</div>`;
+                    trashFiles.forEach(f => { html += `<div class="p-3 bg-slate-900 border border-slate-800 rounded-xl flex flex-col items-center opacity-70 hover:opacity-100 transition"><span class="text-3xl mb-2 grayscale">🗑️</span><span class="text-[10px] truncate w-full text-center mb-3 font-semibold text-slate-400 line-through" title="${f.name}">${f.name}</span><div class="flex gap-1 w-full"><button class="flex-1 bg-emerald-700 hover:bg-emerald-600 text-[10px] font-bold rounded py-1 transition" onclick="HQAudio.uiClick(); BackendFS.restoreFile(${f.id}).then(()=>document.getElementById('${containerId}').dispatchEvent(new Event('refresh')))">Recuperar</button><button class="px-2 bg-red-700 hover:bg-red-600 text-[10px] font-bold rounded transition" onclick="HQAudio.uiClick(); BackendFS.hardDelete(${f.id}).then(()=>document.getElementById('${containerId}').dispatchEvent(new Event('refresh')))">Destruir</button></div></div>`; });
+                    html += `</div></div>`; el.innerHTML = html;
+                }; el.addEventListener('refresh', renderTrash); renderTrash();
             }
             else if (appId === 'terminal') {
-                el.innerHTML = `
-                    <div class="flex flex-col h-full bg-black text-emerald-400 font-mono text-[11px] p-3 shadow-inner shadow-emerald-900/20" onclick="document.getElementById('term_in_${containerId}').focus()">
-                        <div class="mb-3 text-emerald-300 font-bold border-b border-emerald-900/50 pb-2">Quinzuo OS Terminal v5.8<br>Conectado ao Node.js Local (VHD + Shell)</div>
-                        <div id="term_out_${containerId}" class="flex-1 overflow-y-auto whitespace-pre-wrap break-words pr-2" style="scrollbar-width: thin; scrollbar-color: #059669 #000;"></div>
-                        <div class="flex items-center gap-2 mt-2 pt-2 border-t border-emerald-900/50">
-                            <span class="text-emerald-500 font-bold">quinzuo@os:~$</span>
-                            <input type="text" id="term_in_${containerId}" class="flex-1 bg-transparent text-emerald-400 outline-none border-none font-mono text-[11px]" autocomplete="off" spellcheck="false">
-                        </div>
-                    </div>
-                `;
+                el.innerHTML = `<div class="flex flex-col h-full bg-black text-emerald-400 font-mono text-[11px] p-3 shadow-inner shadow-emerald-900/20" onclick="document.getElementById('term_in_${containerId}').focus()"><div class="mb-3 text-emerald-300 font-bold border-b border-emerald-900/50 pb-2">Quinzuo OS Terminal v5.8<br>Conectado ao Node.js Local (VHD + Shell)</div><div id="term_out_${containerId}" class="flex-1 overflow-y-auto whitespace-pre-wrap break-words pr-2" style="scrollbar-width: thin; scrollbar-color: #059669 #000;"></div><div class="flex items-center gap-2 mt-2 pt-2 border-t border-emerald-900/50"><span class="text-emerald-500 font-bold">quinzuo@os:~$</span><input type="text" id="term_in_${containerId}" class="flex-1 bg-transparent text-emerald-400 outline-none border-none font-mono text-[11px]" autocomplete="off" spellcheck="false"></div></div>`;
                 const input = el.querySelector(`#term_in_${containerId}`); const out = el.querySelector(`#term_out_${containerId}`);
                 input.onkeydown = async (e) => {
                     if (e.key === 'Enter') {
                         const cmd = input.value; input.value = ''; if (!cmd.trim()) return;
                         if (cmd.trim() === 'clear') { out.innerHTML = ''; return; }
                         out.innerHTML += `<div class="mt-1"><span class="text-emerald-500 font-bold">quinzuo@os:~$</span> ${cmd}</div>`; out.scrollTop = out.scrollHeight;
-                        try {
-                            const res = await fetch('/api/terminal', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ command: cmd }) });
-                            const data = await res.json();
-                            out.innerHTML += `<div class="text-emerald-200 mt-1 pl-2 border-l-2 border-emerald-800">${data.output.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`;
-                        } catch(err) { out.innerHTML += `<div class="text-red-400 mt-1">Erro de conexão com a API do Terminal.</div>`; }
+                        try { const res = await fetch('/api/terminal', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ command: cmd }) }); const data = await res.json(); out.innerHTML += `<div class="text-emerald-200 mt-1 pl-2 border-l-2 border-emerald-800">${data.output.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`; } catch(err) { out.innerHTML += `<div class="text-red-400 mt-1">Erro de conexão.</div>`; }
                         out.scrollTop = out.scrollHeight;
                     }
-                };
-                setTimeout(() => input.focus(), 150);
+                }; setTimeout(() => input.focus(), 150);
             }
-            else if (appId === 'floppy') {
-                const renderFloppy = () => {
-                    let html = `<div class="p-4 flex flex-col h-full bg-slate-950 text-white"><div class="flex gap-2 mb-4 border-b border-slate-800 pb-4"><label class="px-3 py-1.5 bg-cyan-600 rounded cursor-pointer text-xs font-bold hover:bg-cyan-500 transition" onclick="HQAudio.uiClick()">📤 Enviar Arquivo<input type="file" id="upFile_${containerId}" accept=".html,.js,.txt,.css" class="hidden"></label><button id="addUrl_${containerId}" class="px-3 py-1.5 bg-violet-600 rounded text-xs font-bold hover:bg-violet-500 transition">🔗 Vincular URL na Área de Trabalho</button></div><div class="grid grid-cols-4 gap-3 overflow-y-auto">`;
-                    if (Quinzuo.files.length === 0) html += `<div class="col-span-4 text-center text-slate-500 text-xs mt-10">O VHD está vazio.</div>`;
-                    Quinzuo.files.forEach(f => { html += `<div class="p-3 bg-slate-900 border border-slate-800 rounded-xl flex flex-col items-center hover:border-cyan-500 transition"><span class="text-3xl mb-2">${f.is_url ? '🌐' : (f.type==='image/png'?'🖼️':(f.type.includes('html')||f.name.endsWith('.html')?'⚡':'📄'))}</span><span class="text-[10px] truncate w-full text-center mb-3 font-semibold text-slate-300" title="${f.name}">${f.name}</span><div class="flex gap-1 w-full"><button class="flex-1 bg-slate-700 hover:bg-slate-600 text-[10px] font-bold rounded py-1 transition" onclick="renameDesktopFile(${f.id}, '${f.name}')">Renomear</button><button class="px-2 bg-red-600 hover:bg-red-500 text-[10px] font-bold rounded transition" onclick="deleteDesktopFile(${f.id})">X</button></div></div>`; });
-                    html += `</div></div>`; el.innerHTML = html;
-                    el.querySelector(`#upFile_${containerId}`).onchange = (e) => { const file = e.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = async (ev) => { await BackendFS.saveFile(file.name, file.type || 'text/plain', ev.target.result, false); el.dispatchEvent(new Event('refresh')); }; reader.readAsText(file); };
-                    el.querySelector(`#addUrl_${containerId}`).onclick = async () => { HQAudio.uiClick(); const url = prompt("Digite a URL para iframe:"); if (url) { const name = prompt("Nome do Atalho:") || "Web App"; await BackendFS.saveFile(name, 'url', url, true); el.dispatchEvent(new Event('refresh')); } };
-                };
-                el.addEventListener('refresh', renderFloppy); renderFloppy();
-            } 
-            else if (appId === 'office') {
-                el.innerHTML = `
-                    <div class="p-6 h-full bg-slate-950 text-slate-100 flex flex-col items-center justify-center space-y-6 overflow-y-auto">
-                        <div class="text-center">
-                            <h2 class="text-2xl font-extrabold text-cyan-400 mb-1">QUINZUO OFFICE</h2>
-                            <p class="text-xs text-slate-400">Todos os arquivos criados aqui são salvos nativamente como .html no VHD</p>
-                        </div>
-                        <div class="grid grid-cols-2 gap-4 w-full max-w-md mt-4">
-                            <button onclick="openApp('word')" class="p-4 bg-slate-900 border border-slate-800 rounded-xl flex flex-col items-center gap-2 hover:border-violet-500 transition"><span class="text-3xl">📄</span><span class="font-bold text-sm">Quinzuo Word</span></button>
-                            <button onclick="openApp('excel')" class="p-4 bg-slate-900 border border-slate-800 rounded-xl flex flex-col items-center gap-2 hover:border-emerald-500 transition"><span class="text-3xl">📊</span><span class="font-bold text-sm">Quinzuo Excel</span></button>
-                            <button onclick="openApp('access')" class="p-4 bg-slate-900 border border-slate-800 rounded-xl flex flex-col items-center gap-2 hover:border-cyan-500 transition"><span class="text-3xl">🗄️</span><span class="font-bold text-sm">Quinzuo Access</span></button>
-                            <button onclick="openApp('jseditor')" class="p-4 bg-slate-900 border border-slate-800 rounded-xl flex flex-col items-center gap-2 hover:border-blue-500 transition"><span class="text-3xl">⚡</span><span class="font-bold text-sm">Editor HTML/JS</span></button>
-                        </div>
-                    </div>
-                `;
+            // Word, Excel, Access e Editor mantidos iguas mas com VHD centralizado
+            else if (appId === 'word') {
+                el.innerHTML = `<div class="flex flex-col h-full bg-slate-200 text-black"><div class="p-2 bg-slate-800 border-b border-slate-700 flex items-center gap-2 flex-wrap"><input type="text" id="word_name_${containerId}" class="bg-slate-950 text-white px-2 py-1 text-xs border border-slate-600 rounded outline-none w-40" placeholder="documento" value="${fileData ? fileData.name.replace('.html','') : 'documento'}"><button id="word_save_${containerId}" class="px-3 py-1 bg-violet-600 text-white text-xs font-semibold rounded hover:bg-violet-500 transition">💾 Salvar .html no VHD</button><div class="w-px h-4 bg-slate-600 mx-2"></div><button onclick="document.execCommand('bold')" class="px-3 py-1 bg-slate-700 text-white rounded text-xs font-bold hover:bg-slate-600">B</button><button onclick="document.execCommand('italic')" class="px-3 py-1 bg-slate-700 text-white rounded text-xs font-serif italic hover:bg-slate-600">I</button><button onclick="document.execCommand('underline')" class="px-3 py-1 bg-slate-700 text-white rounded text-xs underline hover:bg-slate-600">U</button></div><div id="word_editor_${containerId}" contenteditable="true" class="flex-1 p-8 bg-white outline-none overflow-y-auto text-sm shadow-inner">${fileData ? fileData.content : '<h1 style="font-size:24px; color:#1e293b;">Documento Quinzuo</h1><p>Comece a escrever...</p>'}</div></div>`;
+                el.querySelector(`#word_save_${containerId}`).onclick = async () => { HQAudio.uiClick(); let name = el.querySelector(`#word_name_${containerId}`).value || 'documento'; if(!name.endsWith('.html')) name += '.html'; const content = el.querySelector(`#word_editor_${containerId}`).innerHTML; if (fileData) await BackendFS.hardDelete(fileData.id); await BackendFS.saveFile(name, 'text/html', content, false); alert("Documento salvo!"); };
+            }
+            else if (appId === 'excel') {
+                let initialContent = ''; if (fileData) initialContent = fileData.content; else { initialContent = '<table class="w-full border-collapse text-xs bg-white text-black">'; for(let r=0; r<20; r++) { initialContent += '<tr>'; for(let c=0; c<10; c++) initialContent += `<td contenteditable="true" class="border border-slate-300 p-2 min-w-[80px] outline-none focus:bg-blue-50"></td>`; initialContent += '</tr>'; } initialContent += '</table>'; }
+                el.innerHTML = `<div class="flex flex-col h-full bg-slate-200"><div class="p-2 bg-slate-800 border-b border-slate-700 flex items-center gap-2"><input type="text" id="excel_name_${containerId}" class="bg-slate-950 text-white px-2 py-1 text-xs border border-slate-600 rounded outline-none w-40" placeholder="planilha" value="${fileData ? fileData.name.replace('.html','') : 'planilha'}"><button id="excel_save_${containerId}" class="px-3 py-1 bg-emerald-600 text-white text-xs font-semibold rounded hover:bg-emerald-500 transition">📊 Salvar .html no VHD</button></div><div id="excel_editor_${containerId}" class="flex-1 overflow-auto bg-slate-100 p-2">${initialContent}</div></div>`;
+                el.querySelector(`#excel_save_${containerId}`).onclick = async () => { HQAudio.uiClick(); let name = el.querySelector(`#excel_name_${containerId}`).value || 'planilha'; if(!name.endsWith('.html')) name += '.html'; const content = el.querySelector(`#excel_editor_${containerId}`).innerHTML; if (fileData) await BackendFS.hardDelete(fileData.id); await BackendFS.saveFile(name, 'text/html', content, false); alert("Planilha salva!"); };
+            }
+            else if (appId === 'access') {
+                let initialContent = fileData ? fileData.content : `<table class="w-full text-left border-collapse text-xs text-black"><thead class="bg-slate-300 border-b border-slate-400"><tr><th class="p-2 border border-slate-300">ID</th><th class="p-2 border border-slate-300">Entidade</th><th class="p-2 border border-slate-300">Valor/Status</th></tr></thead><tbody class="bg-white"><tr><td contenteditable="true" class="p-2 border border-slate-300">1</td><td contenteditable="true" class="p-2 border border-slate-300">...</td><td contenteditable="true" class="p-2 border border-slate-300">...</td></tr></tbody></table>`;
+                el.innerHTML = `<div class="flex flex-col h-full bg-slate-200"><div class="p-2 bg-slate-800 border-b border-slate-700 flex items-center gap-2 flex-wrap"><input type="text" id="acc_name_${containerId}" class="bg-slate-950 text-white px-2 py-1 text-xs border border-slate-600 rounded outline-none w-40" placeholder="banco_dados" value="${fileData ? fileData.name.replace('.html','') : 'banco_dados'}"><button id="acc_save_${containerId}" class="px-3 py-1 bg-cyan-600 text-white text-xs font-semibold rounded hover:bg-cyan-500 transition">🗄️ Salvar .html</button><button id="acc_add_${containerId}" class="px-3 py-1 bg-slate-700 text-white text-xs font-semibold rounded hover:bg-slate-600 transition ml-auto">+ Nova Linha</button></div><div id="acc_editor_${containerId}" class="flex-1 overflow-auto p-2 bg-slate-100">${initialContent}</div></div>`;
+                el.querySelector(`#acc_add_${containerId}`).onclick = () => { const tbody = el.querySelector('tbody'); const tr = document.createElement('tr'); const id = tbody.children.length + 1; tr.innerHTML = `<td contenteditable="true" class="p-2 border border-slate-300">${id}</td><td contenteditable="true" class="p-2 border border-slate-300">...</td><td contenteditable="true" class="p-2 border border-slate-300">...</td>`; tbody.appendChild(tr); };
+                el.querySelector(`#acc_save_${containerId}`).onclick = async () => { HQAudio.uiClick(); let name = el.querySelector(`#acc_name_${containerId}`).value || 'banco_dados'; if(!name.endsWith('.html')) name += '.html'; const content = el.querySelector(`#acc_editor_${containerId}`).innerHTML; if (fileData) await BackendFS.hardDelete(fileData.id); await BackendFS.saveFile(name, 'text/html', content, false); alert("BD salvo!"); };
+            }
+            else if (appId === 'jseditor') {
+                const defCode = `<!DOCTYPE html>\n<html>\n<head>\n<style>\n  body { background: #222; color: #0f0; font-family: monospace; padding: 20px; }\n</style>\n</head>\n<body>\n  <h1>Olá Mundo Web</h1>\n  <p>Edite e clique em Testar.</p>\n  <script>\n    console.log("Executando...");\n  <\/script>\n</body>\n</html>`;
+                el.innerHTML = `<div class="flex flex-col h-full bg-slate-900"><div class="p-2 bg-slate-800 border-b border-slate-700 flex items-center gap-2 flex-wrap"><input type="text" id="js_name_${containerId}" class="bg-slate-950 text-white px-2 py-1 text-xs border border-slate-600 rounded outline-none w-40" placeholder="app.html" value="${fileData ? fileData.name : 'app.html'}"><button id="js_save_${containerId}" class="px-3 py-1 bg-violet-600 text-white text-xs font-semibold rounded hover:bg-violet-500 transition">💾 Salvar HTML</button><button id="js_run_${containerId}" class="px-3 py-1 bg-emerald-600 text-white text-xs font-semibold rounded hover:bg-emerald-500 transition ml-auto">▶️ Testar Código</button></div><div class="flex-1 flex flex-row"><textarea id="js_code_${containerId}" class="w-1/2 h-full p-3 bg-slate-950 text-emerald-400 font-mono text-[11px] border-r border-slate-700 outline-none resize-none whitespace-pre" spellcheck="false">${fileData ? fileData.content : defCode}</textarea><div class="w-1/2 h-full bg-white relative"><iframe id="js_preview_${containerId}" class="absolute inset-0 w-full h-full border-none bg-white"></iframe></div></div></div>`;
+                const runCode = () => { const code = el.querySelector(`#js_code_${containerId}`).value; el.querySelector(`#js_preview_${containerId}`).srcdoc = code; };
+                el.querySelector(`#js_run_${containerId}`).onclick = () => { HQAudio.uiClick(); runCode(); };
+                el.querySelector(`#js_save_${containerId}`).onclick = async () => { HQAudio.uiClick(); let name = el.querySelector(`#js_name_${containerId}`).value || 'app.html'; if(!name.endsWith('.html')) name += '.html'; const content = el.querySelector(`#js_code_${containerId}`).value; if (fileData) await BackendFS.hardDelete(fileData.id); await BackendFS.saveFile(name, 'text/html', content, false); alert("Código salvo!"); };
+                if(fileData) runCode();
             }
             else if (appId === 'notepad') {
                 el.innerHTML = `<div class="flex flex-col h-full bg-slate-900"><div class="p-2 bg-slate-800 border-b border-slate-700 flex items-center gap-2"><input type="text" id="np_name_${containerId}" class="bg-slate-950 text-white px-2 py-1 text-xs border border-slate-600 rounded outline-none w-40" placeholder="nome_do_arquivo.txt" value="${fileData ? fileData.name : 'nova_nota.txt'}"><button id="np_save_${containerId}" class="px-3 py-1 bg-violet-600 text-white text-xs font-semibold rounded hover:bg-violet-500 transition">💾 Salvar no VHD</button></div><textarea id="np_text_${containerId}" class="flex-1 p-4 bg-slate-950 text-slate-100 font-mono text-sm border-none outline-none resize-none" placeholder="Escreva o seu texto/código aqui...">${fileData ? fileData.content : ''}</textarea></div>`;
-                el.querySelector(`#np_save_${containerId}`).onclick = async () => { HQAudio.uiClick(); const name = el.querySelector(`#np_name_${containerId}`).value || 'nota_sem_nome.txt'; const content = el.querySelector(`#np_text_${containerId}`).value; if (fileData) await BackendFS.deleteFile(fileData.id); await BackendFS.saveFile(name, 'text/plain', content, false); alert("Salvo com sucesso na Área de Trabalho (VHD)!"); closeWindow('win_notepad_' + containerId.split('_')[2]); };
-            }
-            else if (appId === 'pintaclima') {
-                el.innerHTML = `<div class="flex flex-col h-full bg-slate-900"><div class="p-2 bg-slate-800 border-b border-slate-700 flex items-center gap-3 flex-wrap"><input type="color" id="pc_color_${containerId}" value="#f97316" class="w-8 h-8 rounded cursor-pointer"><input type="range" id="pc_size_${containerId}" min="1" max="40" value="5" class="w-24"><button id="pc_clear_${containerId}" class="px-3 py-1 bg-slate-600 text-white text-xs font-semibold rounded hover:bg-slate-500 transition">Limpar Tela</button><div class="ml-auto flex gap-2"><input type="text" id="pc_name_${containerId}" class="bg-slate-950 text-white px-2 py-1 text-xs border border-slate-600 rounded outline-none w-32" placeholder="desenho.png" value="${fileData ? fileData.name : 'arte_clima.png'}"><button id="pc_save_${containerId}" class="px-3 py-1 bg-emerald-600 text-white text-xs font-semibold rounded hover:bg-emerald-500 transition">🖼️ Salvar no VHD</button></div></div><div class="flex-1 bg-white relative overflow-hidden" id="canvas_container_${containerId}"><canvas id="pc_canvas_${containerId}" class="absolute inset-0 cursor-crosshair"></canvas></div></div>`;
-                const canvas = el.querySelector(`#pc_canvas_${containerId}`), ctx = canvas.getContext('2d');
-                setTimeout(() => {
-                    const container = el.querySelector(`#canvas_container_${containerId}`); canvas.width = container.clientWidth; canvas.height = container.clientHeight;
-                    if (fileData && fileData.type === 'image/png') { const img = new Image(); img.onload = () => ctx.drawImage(img, 0, 0); img.src = fileData.content; } else { ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, canvas.width, canvas.height); }
-                }, 100);
-                let drawing = false; canvas.onmousedown = (e) => { drawing = true; draw(e); }; canvas.onmouseup = () => { drawing = false; ctx.beginPath(); }; canvas.onmousemove = (e) => { if(drawing) draw(e); }; canvas.onmouseleave = () => { drawing = false; ctx.beginPath(); };
-                function draw(e) { const rect = canvas.getBoundingClientRect(), x = e.clientX - rect.left, y = e.clientY - rect.top; ctx.lineWidth = el.querySelector(`#pc_size_${containerId}`).value; ctx.lineCap = 'round'; ctx.strokeStyle = el.querySelector(`#pc_color_${containerId}`).value; ctx.lineTo(x, y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(x, y); }
-                el.querySelector(`#pc_clear_${containerId}`).onclick = () => { HQAudio.uiClick(); ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, canvas.width, canvas.height); };
-                el.querySelector(`#pc_save_${containerId}`).onclick = async () => { HQAudio.uiClick(); const name = el.querySelector(`#pc_name_${containerId}`).value || 'pintura.png'; const dataUrl = canvas.toDataURL('image/png'); if (fileData) await BackendFS.deleteFile(fileData.id); await BackendFS.saveFile(name, 'image/png', dataUrl, false); alert("Obra de arte salva na Área de Trabalho!"); };
+                el.querySelector(`#np_save_${containerId}`).onclick = async () => { HQAudio.uiClick(); const name = el.querySelector(`#np_name_${containerId}`).value || 'nota_sem_nome.txt'; const content = el.querySelector(`#np_text_${containerId}`).value; if (fileData) await BackendFS.hardDelete(fileData.id); await BackendFS.saveFile(name, 'text/plain', content, false); alert("Salvo no VHD!"); closeWindow('win_notepad_' + containerId.split('_')[2]); };
             }
             else if (appId === 'browser') {
                  el.innerHTML = `<div class="flex flex-col h-full bg-slate-900"><div class="p-2 bg-slate-800 flex gap-2 border-b border-slate-700 items-center"><span class="text-xs font-bold text-slate-400 pl-2">Visualizador HTML:</span><input type="text" id="urlInput_${containerId}" class="flex-1 bg-slate-950 text-white px-3 py-1.5 rounded text-xs outline-none border border-slate-700" readonly value="${fileData ? (fileData.is_url ? fileData.content : 'Ficheiro HTML do VHD - (' + fileData.name + ')') : ''}"></div><iframe id="iframe_${containerId}" class="flex-1 w-full bg-white border-none"></iframe></div>`;
                 setTimeout(() => { const iframe = el.querySelector(`#iframe_${containerId}`); if (fileData) { if (fileData.is_url) iframe.src = fileData.content; else iframe.srcdoc = fileData.content.replace(/"/g, '&quot;'); } }, 50);
             }
-            else if (appId === 'trash') { el.innerHTML = `<div class="p-4 h-full bg-slate-950 text-slate-400 flex flex-col items-center justify-center"><span class="text-6xl mb-4 opacity-50">🗑️</span><h3 class="text-lg font-bold text-slate-300">A Lixeira está vazia</h3><p class="text-[10px] mt-2">Dica: Clica com o botão direito num ficheiro na Área de Trabalho para o excluir.</p></div>`; }
         }
     </script>
 </body>
